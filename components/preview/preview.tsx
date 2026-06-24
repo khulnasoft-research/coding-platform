@@ -20,10 +20,12 @@ export function Preview({ className, disabled, url }: Props) {
   const [isLoading, setIsLoading] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const loadStartTime = useRef<number | null>(null)
-
   useEffect(() => {
-    setCurrentUrl(url)
-    setInputValue(url || '')
+    const id = setTimeout(() => {
+      setCurrentUrl(url)
+      setInputValue(url || '')
+    }, 0)
+    return () => clearTimeout(id)
   }, [url])
 
   const refreshIframe = () => {

@@ -31,9 +31,10 @@ export const Message = memo(function Message({ message }: Props) {
 
   useEffect(() => {
     if (reasoningParts.length > 0) {
-      const latestReasoningIndex =
-        reasoningParts[reasoningParts.length - 1].index
-      setExpandedReasoningIndex(latestReasoningIndex)
+      const id = setTimeout(() => {
+        setExpandedReasoningIndex(reasoningParts[reasoningParts.length - 1].index)
+      }, 0)
+      return () => clearTimeout(id)
     }
   }, [reasoningParts])
 

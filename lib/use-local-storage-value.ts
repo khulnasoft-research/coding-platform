@@ -5,11 +5,12 @@ export function useLocalStorageValue(key: string) {
   const [isInitialized, setIsInitialized] = useState(false)
 
   useEffect(() => {
-    const storedValue = localStorage.getItem(key)
-    if (storedValue !== null) {
-      setValue(storedValue)
-    }
-    setIsInitialized(true)
+    const id = setTimeout(() => {
+      const storedValue = localStorage.getItem(key)
+      setValue(storedValue ?? '')
+      setIsInitialized(true)
+    }, 0)
+    return () => clearTimeout(id)
   }, [key])
 
   useEffect(() => {

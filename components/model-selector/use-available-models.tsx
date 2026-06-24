@@ -56,7 +56,8 @@ export function useAvailableModels() {
 
   useEffect(() => {
     if (retryCount === 0) {
-      fetchModels(false)
+      const id = setTimeout(() => fetchModels(false), 0)
+      return () => clearTimeout(id)
     } else if (retryCount > 0 && retryCount <= MAX_RETRIES) {
       const timerId = setTimeout(() => {
         fetchModels(true)
