@@ -19,7 +19,7 @@ const ChatContext = createContext<ChatContextValue | undefined>(undefined)
 export function ChatProvider({ children }: { children: ReactNode }) {
   const mapDataToState = useDataStateMapper()
 
-  const [{ chat }] = useState(() => {
+  const [chatWrapper] = useState(() => {
     let handleData = mapDataToState
     const instance = new Chat<ChatUIMessage>({
       onToolCall: () => mutate('/api/auth/info'),
@@ -37,10 +37,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
   })
 
-  chat.update(mapDataToState)
+  chatWrapper.update(mapDataToState)
 
   return (
-    <ChatContext.Provider value={{ chat: chat.chat }}>
+    <ChatContext.Provider value={{ chat: chatWrapper.chat }}>
       {children}
     </ChatContext.Provider>
   )
