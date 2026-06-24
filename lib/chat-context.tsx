@@ -5,7 +5,7 @@ import { type ReactNode } from 'react'
 import { Chat } from '@ai-sdk/react'
 import { DataPart } from '@/ai/messages/data-parts'
 import { DataUIPart } from 'ai'
-import { createContext, useContext, useMemo, useRef } from 'react'
+import { createContext, useContext, useState } from 'react'
 import { useDataStateMapper } from '@/app/state'
 import { mutate } from 'swr'
 import { toast } from 'sonner'
@@ -18,24 +18,31 @@ const ChatContext = createContext<ChatContextValue | undefined>(undefined)
 
 export function ChatProvider({ children }: { children: ReactNode }) {
   const mapDataToState = useDataStateMapper()
-  const mapDataToStateRef = useRef(mapDataToState)
-  mapDataToStateRef.current = mapDataToState
 
-  const chat = useMemo(
-    () =>
-      new Chat<ChatUIMessage>({
-        onToolCall: () => mutate('/api/auth/info'),
-        onData: (data: DataUIPart<DataPart>) => mapDataToStateRef.current(data),
-        onError: (error) => {
-          toast.error(`Communication error with the AI: ${error.message}`)
-          console.error('Error sending message:', error)
-        },
-      }),
-    []
-  )
+  const [{ chat }] = useState(() => {
+    let handleData = mapDataToState
+    const instance = new Chat<ChatUIMessage>({
+      onToolCall: () => mutate('/api/auth/info'),
+      onData: (data: DataUIPart<DataPart>) => handleData(data),
+      onError: (error) => {
+        toast.error(`Communication error with the AI: ${error.message}`)
+        console.error('Error sending message:', error)
+      },
+    })
+    return {
+      chat: instance,
+      update: (fn: typeof mapDataToState) => {
+        handleData = fn
+      },
+    }
+  })
+
+  chat.update(mapDataToState)
 
   return (
-    <ChatContext.Provider value={{ chat }}>{children}</ChatContext.Provider>
+    <ChatContext.Provider value={{ chat: chat.chat }}>
+      {children}
+    </ChatContext.Provider>
   )
 }
 
